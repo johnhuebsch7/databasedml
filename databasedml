@@ -1,0 +1,51 @@
+select airline
+from public.route
+where (source_airport_id IN (
+ select id
+ from public.airport
+ where altitude > 10000
+ ) AND destination_airport_id IN (
+ select id
+ from public.airport
+ where altitude > 10000
+ )
+)
+group by airline;
+
+with toAthens_SRC_ID as (
+ select source_airport_id
+ from public.route
+ where destination_airport_id = 3941
+), fromMSP_DST_ID as (
+ select destination_airport_id
+ from public.route
+ where source_airport_id = 3858
+)
+select name, city, country
+from public.airport
+where (
+ (id IN (select * from toAthens_SRC_ID))
+ AND
+ (id IN (select * from fromMSP_DST_ID))
+)
+group by name, city, country;
+
+with MinneapolisAirports as (
+ select id
+ from public.airport
+ where city = 'Minneapolis'
+), MSPAsSource as (
+ select airline_id
+ from public.route
+ where (
+  source_airport_id IN (select * from MinneapolisAirports)
+ )
+)
+select name
+from public.airline
+where (
+ (id IN (select * from MSPAsSource))
+ AND
+ (country != 'ALASKA')
+)
+group by name;
