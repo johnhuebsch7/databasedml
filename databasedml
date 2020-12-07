@@ -49,3 +49,34 @@ where (
  (country != 'ALASKA')
 )
 group by name;
+
+create view noWayHome as
+with name_SRC_DST (sourceName, DestinationName, Source1, dest1) as (
+ select source_airport, destination_airport, source_airport_id, destination_airport_id
+ from public.route
+), returnTrip (farEnd, home) as (
+ select source_airport_id, destination_airport_id
+ from public.route
+), joinedTrips as (
+ select *
+ from name_SRC_DST
+ join returnTrip
+  on dest1 = farEnd
+), roundTrips as (
+ select sourceName, destinationName, source1, dest1
+ from joinedTrips
+ where (
+  Source1 = home
+ )
+)
+select sourceName, DestinationName
+from name_SRC_DST
+except
+ select sourceName, DestinationName
+ from roundTrips
+group by sourceName, DestinationName;
+
+select destinationName, count(destinationName as howmany
+from noWayHome
+group by destinationName
+order by howmany desc;
