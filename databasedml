@@ -76,7 +76,7 @@ except
  from roundTrips
 group by sourceName, DestinationName;
 
-select destinationName, count(destinationName as howmany
+select destinationName, count(destinationName) as howmany
 from noWayHome
 group by destinationName
 order by howmany desc;
